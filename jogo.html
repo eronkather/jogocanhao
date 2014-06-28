@@ -53,6 +53,7 @@
 		var targetindex;
 		var ballindex;
 		var cannonindex;
+		var processandoAnimacao;
 		
 		if(typeof pontos == undefined || isNaN(pontos)){
 			var pontos = 0;
@@ -90,6 +91,7 @@
 			groundy = 300;
 			groundw = 800;
 			groundh = 600;
+			processandoAnimacao = false;
 
 			target = new Picture(targetx,targety,targetw,targeth,"alvo.jpg");
 			htarget = new Picture(htargetx, htargety, htargetw, htargeth, "plateau.jpg");
@@ -189,12 +191,16 @@
 		  	drawall();  
 		} 
 		function fire() {
-			//SOM DO CANHÃO
-			playAudioCanhao();
-			//DESENHANDO TRAJETO
-			drawall();
-			//FUNÇÃO DE LOOP COM INTERVALO DE 100 MILISSEGUNDOS CHAMANDO FUNÇÃO 'change()' QUE IRÁ PROCESSAR ANIMAÇÃO E VERIFICAR SE ATINGIU O ALVO OU O CHÃO.
-			tid = setInterval(change,100);
+			//VERIFICA SE A ANIMAÇÃO ESTÁ SENDO PROCESSADA.
+			if(!processandoAnimacao) {
+				processandoAnimacao = true;
+				//SOM DO CANHÃO
+				playAudioCanhao();
+				//DESENHANDO TRAJETO
+				drawall();
+				//FUNÇÃO DE LOOP COM INTERVALO DE 50 MILISSEGUNDOS CHAMANDO FUNÇÃO 'change()' QUE IRÁ PROCESSAR ANIMAÇÃO E VERIFICAR SE ATINGIU O ALVO OU O CHÃO.
+				tid = setInterval(change,50);
+			}
 			return false;
 		}
 
@@ -217,44 +223,46 @@
 		}
 
 		function keypress(keyEvent) {
-			//UP: 38
-			//DOWN: 40
-			//RIGHT: 39
-			//LEFT: 37
-			var k = keyEvent.keyCode;
-			var a = Number(document.f.ang.value);
-			var v = Number(document.f.vo.value);
+			if(!processandoAnimacao) {
+				//UP: 38
+				//DOWN: 40
+				//RIGHT: 39
+				//LEFT: 37
+				var k = keyEvent.keyCode;
+				var a = Number(document.f.ang.value);
+				var v = Number(document.f.vo.value);
 
-			//VERIFICANDO TECLA PRESSIONADA:
-			if(k === 38) {
-				//CIMA
-				a++;
-			} else if(k === 40) {
-				//BAIXO
-				a--;
-			} else if(k === 39) {
-				//DIREITA
-				v++;
-			} else if(k === 37) {
-				//ESQUERDA
-				v--;
-			} else if(k === 13) {
-				//ENTER
-				document.getElementById('fireButton').click();
+				//VERIFICANDO TECLA PRESSIONADA:
+				if(k === 38) {
+					//CIMA
+					a++;
+				} else if(k === 40) {
+					//BAIXO
+					a--;
+				} else if(k === 39) {
+					//DIREITA
+					v++;
+				} else if(k === 37) {
+					//ESQUERDA
+					v--;
+				} else if(k === 13) {
+					//ENTER
+					document.getElementById('fireButton').click();
+				}
+
+				//ATUALIZAR POSIÇÃO DO CANHÃO E DA BOLA QUE ESTÁ NA PONTA.
+				document.f.ang.value = a;
+				document.f.vo.value = v;
+				drawall();
+			  	var angle = Number(document.f.ang.value);
+			  	var outofcannon = Number(document.f.vo.value);
+			  	var angleradians = angle*Math.PI/180;
+			  	horvelocity =  outofcannon*Math.cos(angleradians);
+			  	verticalvel1 = - outofcannon*Math.sin(angleradians);
+			  	everything[cannonindex][2]= - angleradians;
+			  	cball.sx = cannonx + cannonlength*Math.cos(angleradians);
+			  	cball.sy = cannony+cannonht*.5 - cannonlength*Math.sin(angleradians);
 			}
-
-			//ATUALIZAR POSIÇÃO DO CANHÃO E DA BOLA QUE ESTÁ NA PONTA.
-			document.f.ang.value = a;
-			document.f.vo.value = v;
-			drawall();
-		  	var angle = Number(document.f.ang.value);
-		  	var outofcannon = Number(document.f.vo.value);
-		  	var angleradians = angle*Math.PI/180;
-		  	horvelocity =  outofcannon*Math.cos(angleradians);
-		  	verticalvel1 = - outofcannon*Math.sin(angleradians);
-		  	everything[cannonindex][2]= - angleradians;
-		  	cball.sx = cannonx + cannonlength*Math.cos(angleradians);
-		  	cball.sy = cannony+cannonht*.5 - cannonlength*Math.sin(angleradians);
 		}
 
 		function change() {
@@ -275,20 +283,23 @@
 				//ACERTOU O ALVO.
 				clearInterval(tid);
 				//remove target e insere htarget
-				everything.splice(targetindex,1,[htarget,false]);
+				//everything.splice(targetindex,1,[htarget,false]);
 				//everything.splice(ballindex,1);
 				drawall();
 				//
 				pontuacao();
 				//REINICIANDO VALORES. (exceto pontuação).
 				setValues();
-			}
 			//verifica se alcançou o chão
-			if (by>=ground.sy) {
+			} else if (by>=ground.sy || bx >= cwidth) {
 				//ATINGIU O CHÃO
 				clearInterval(tid);
+				processandoAnimacao = false;
+				drawall();
+				setValues();
+			} else {
+				drawall();
 			}
-			drawall();
 		}
 
 	</script>
