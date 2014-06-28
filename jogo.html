@@ -7,9 +7,12 @@
 	margin:20px;
 	background-color:brown;
 	padding:20px;
-}
+	}
 	</style>
     <script type="text/javascript">
+    //define bola, imagem, retangulos para objeto em canvas. Cada um tem um método de desenho.
+	//Cada objeto desenhado no canbas corresponde a um elemento no array everything.
+	//cada elemento é um array, com alguns dos valore usados para fazer uma rotação.
 	var cwidth = 600;
 	var cheight = 400;
 	var ctx;
@@ -19,7 +22,7 @@
 	var horvelocity;
 	var verticalvel1;
 	var verticalvel2;
-	var gravity = 2;  //arbitrary. Makes for nice arc.
+	var gravity = 2;  //define a gravidade da bola
 	var cannonx = 10;
 	var cannony = 280;
 	var cannonlength = 200;
@@ -33,9 +36,7 @@
 	var htargety = 220;
 	var htargetw = 355;
 	var htargeth = 96;
-//define Ball, Picture, Myrectangles, to be objects on canvas. Each has a draw method.
-//Each object painted on the canvas corresponds to an element in everything array.
-//each element is an array, with some of the values used to perform a rotation.
+
 	
 function Ball(sx,sy,rad,stylestring) {
   this.sx = sx;
@@ -49,7 +50,6 @@ function Ball(sx,sy,rad,stylestring) {
 function drawball() {
 	ctx.fillStyle=this.fillstyle;
 	ctx.beginPath();
-	//ctx.fillStyle= rgb(0,0,0);
 	ctx.arc(this.sx,this.sy,this.rad,0,Math.PI*2,true);
 	ctx.fill();	
 }
