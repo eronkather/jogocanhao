@@ -54,6 +54,7 @@
 		var ballindex;
 		var cannonindex;
 		var processandoAnimacao;
+		var tiros = 10;
 		
 		if(typeof pontos == undefined || isNaN(pontos)){
 			var pontos = 0;
@@ -71,6 +72,9 @@
 			tid;
 			outofcannon;
 			horvelocity;
+			maxv = 70;
+			maxangle = 90;
+			minv = 10;
 			verticalvel1;
 			verticalvel2;
 			gravity = 2;  //define a gravidade da bola
@@ -129,7 +133,7 @@
 			var spanPontuacao = document.getElementById("pontuacao");
 			if (typeof spanPontuacao != 'undefined') {
 				var pontos = new Number(spanPontuacao.innerHTML);
-				pontos += 10;
+				pontos += (80 - outofcannon);
 				spanPontuacao.innerHTML = pontos;
 			}
 		}
@@ -192,7 +196,20 @@
 		} 
 		function fire() {
 			//VERIFICA SE A ANIMAÇÃO ESTÁ SENDO PROCESSADA.
-			if(!processandoAnimacao) {
+			if(!processandoAnimacao && tiros > 0) {
+				tiros--;
+				spanTiros = document.getElementById("tiros");
+				if(spanTiros) {
+					spanTiros.innerHTML = tiros;
+				}
+				var a = Number(document.f.ang.value);
+				var v = Number(document.f.vo.value);
+				if(a < 0) a = 0;
+				if(a > maxangle) a = maxangle;
+				if(v < minv) v = minv;
+				if(v > maxv) v = maxv;
+				document.f.ang.value = a;
+				document.f.vo.value = v;
 				processandoAnimacao = true;
 				//SOM DO CANHÃO
 				playAudioCanhao();
@@ -228,21 +245,25 @@
 				//DOWN: 40
 				//RIGHT: 39
 				//LEFT: 37
-				var k = keyEvent.keyCode;
+
+				var k;
+				if(keyEvent) {
+					k = keyEvent.keyCode;
+				}
 				var a = Number(document.f.ang.value);
 				var v = Number(document.f.vo.value);
 
 				//VERIFICANDO TECLA PRESSIONADA:
-				if(k === 38) {
+				if(k === 38 && a < maxangle) {
 					//CIMA
 					a++;
-				} else if(k === 40) {
+				} else if(k === 40 && a > 0) {
 					//BAIXO
 					a--;
-				} else if(k === 39) {
+				} else if(k === 39 && v < maxv) {
 					//DIREITA
 					v++;
-				} else if(k === 37) {
+				} else if(k === 37 && v > minv) {
 					//ESQUERDA
 					v--;
 				} else if(k === 13) {
@@ -255,7 +276,7 @@
 				document.f.vo.value = v;
 				drawall();
 			  	var angle = Number(document.f.ang.value);
-			  	var outofcannon = Number(document.f.vo.value);
+			  	outofcannon = Number(document.f.vo.value);
 			  	var angleradians = angle*Math.PI/180;
 			  	horvelocity =  outofcannon*Math.cos(angleradians);
 			  	verticalvel1 = - outofcannon*Math.sin(angleradians);
@@ -305,7 +326,7 @@
 	</script>
 	</head>
 	<body onLoad="init();" onkeydown='keypress(event)'>  
-		<h1> Você tem <span id="pontuacao">0</span>  pontos </h1>
+		<h1> Você tem <span id="pontuacao">0</span>  pontos e <span id="tiros">10</span> tiros restantes.</h1>
 		<div style="clear:both;"></div>
 		<canvas id="canvas" width="800" height="400">
 
@@ -318,11 +339,12 @@
 			Ou utilize as teclas [CIMA/BAIXO para angulo, DIREITA/ESQUERDA para velocidade e ENTER para atirar]
 			<br>
 			<br>
-			Velocidade do canhão <input name="vo" id="vo" value="10" type="number" min="-100" max="100" /> 
+			Velocidade do canhão <input name="vo" id="vo" value="30" type="number" min="10" max="70" /> 
 			<br>
-			Ângulo <input name="ang" id="ang" value="0" type="number" min="0" max="80"/>
+			Ângulo <input name="ang" id="ang" value="0" type="number" min="0" max="90" onchange="keypress();" />
 
 			<input id="fireButton" type="button" value="FOGO" onclick="return fire();"/>
+			<input id="resetButton" type="button" value="Reiniciar" onclick="document.f.submit();" />
 		</form> 
 	</body>
 </html>
